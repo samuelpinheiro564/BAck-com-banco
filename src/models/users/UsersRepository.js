@@ -6,41 +6,38 @@ this.pg=pg;
   }
 
   async getUsers() {
-    const allUsers = this.pg.manyOrNone("SELECT * FROM users");
+    const allUsers =await this.pg.manyOrNone("SELECT * FROM users");
     console.log(allUsers);
     return allUsers;
-  }
+  };
 
-  getUserById(id) {
-    const user = this.pg.oneOrNone("SELECT * FROM users WHERE id = $1", id);
+  async  getUserById(id) {
+    const user = await this.pg.oneOrNone("SELECT * FROM users WHERE id = $1", id);
+    return user;
+  };
+
+  async getUserByEmail(email) {
+    const user = await this.pg.oneOrNone("SELECT * FROM users WHERE email = $1", email);
+    return user;
+  };
+
+  async createUser(user) {
+  const user= await this.pg.none("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", [   user.name,user.email, user.password ]);
     return user;
   }
 
-  getUserByEmail(email) {
-    const user = this.users.find((user) => user.email === email);
-    return user;
-  }
-
-  createUser(user) {
-    this.users.push(user);
-    return user;
-  }
-
-  updateUser(id, name, email, password) {
-    const user = this.getUserById(id);
+  async  updateUser(id, name, email, password) {
+    const user = await this.getUserById(id);
 
     if (!user) {
       return null;
     }
+    const userUpdate = await this.pg.oneOrNone("UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *", [name, email, password, id]);
 
-    user.name = name;
-    user.email = email;
-    user.password = password;
-
-    return user;
+    return userUpdate;
   }
 
-  deleteUser(id) {
-    this.users = this.users.filter((user) => user.id !== id);
+  async deleteUser(id) {
+   await this.pg.none("DELETE FROM users WHERE id = $1", id);
   }
 }
