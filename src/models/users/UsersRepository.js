@@ -12,7 +12,7 @@ this.pg=pg;
   }
 
   getUserById(id) {
-    const user = this.users.find((user) => user.id === id);
+    const user = this.pg.oneOrNone("SELECT * FROM users WHERE id = $1", id);
     return user;
   }
 
